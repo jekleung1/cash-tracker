@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Cash Tracker" />
+  <title>Cash Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #080808; color: #e0d8c8; font-family: 'DM Mono', 'Courier New', monospace; padding: 24px 16px; min-height: 100vh; }
+    input { outline: none; }
+    input::placeholder { color: #333; }
+    .wrap { max-width: 480px; margin: 0 auto; }
+    .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 4px; color: #c8a96e; line-height: 1; }
+    .header-sub { font-size: 9px; letter-spacing: 4px; color: #333; text-transform: uppercase; margin-top: 3px; margin-bottom: 28px; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 24px; }
+    .tab { cursor: pointer; padding: 8px 18px; border: 1px solid #1e1e1e; background: transparent; color: #555; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; transition: all 0.2s; }
+    .tab.active { background: #c8a96e; color: #080808; border-color: #c8a96e; font-weight: 500; }
+    .field { width: 100%; background: #101010; border: 1px solid #1e1e1e; color: #e0d8c8; padding: 11px 13px; font-family: 'DM Mono', monospace; font-size: 14px; transition: border 0.15s; }
+    .field:focus { border-color: #c8a96e; }
+    .btn-gold { cursor: pointer; border: none; background: #c8a96e; color: #080808; padding: 14px 28px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 500; width: 100%; transition: background 0.2s; }
+    .btn-gold:hover { background: #d4b97e; }
+    .btn-sm { cursor: pointer; background: transparent; border: 1px solid #222; color: #555; padding: 6px 12px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; transition: all 0.2s; }
+    .lbl { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: #444; margin-bottom: 5px; }
+    .card { background: #0e0e0e; border: 1px solid #1a1a1a; padding: 18px; }
+    .divider { border: none; border-top: 1px solid #161616; margin: 16px 0; }
+    .metric-big { font-family: 'Bebas Neue', sans-serif; font-size: 44px; letter-spacing: 2px; line-height: 1; }
+    .metric-mid { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; line-height: 1; }
+    .metric-sm { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; line-height: 1; }
+    .delta { font-size: 11px; margin-top: 5px; }
+    .up { color: #4ade80; }
+    .down { color: #f87171; }
+    .gold { color: #c8a96e; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid3 { display: flex; gap: 6px; align-items: center; }
+    .win-card { padding: 20px; border: 1px solid #1e1e1e; margin-bottom: 24px; background: #0e0e0e; }
+    .mb8 { margin-bottom: 8px; }
+    .mb16 { margin-bottom: 16px; }
+    .mb20 { margin-bottom: 20px; }
+    .mb24 { margin-bottom: 24px; }
+    .expense-row { display: flex; gap: 6px; margin-bottom: 6px; }
+    .flex-2 { flex: 2; }
+    .flex-1 { flex: 1; }
+    .history-card { background: #0e0e0e; border: 1px solid #1a1a1a; padding: 18px; margin-bottom: 10px; }
+    .history-meta { font-size: 10px; color: #444; letter-spacing: 2px; }
+    .info-bar { font-size: 11px; color: #333; margin-bottom: 20px; padding: 10px 14px; background: #0c0c0c; border: 1px solid #141414; }
+    .empty { text-align: center; padding: 60px 0; color: #2a2a2a; font-size: 13px; }
+    #view-entry { display: block; }
+    #view-history { display: none; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header-title">CASH TRACKER</div>
+  <div class="header-sub">Friday Weekly Review</div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchView('entry')">This Friday</button>
+    <button class="tab" id="history-tab" onclick="switchView('history')">History</button>
+  </div>
+
+  <!-- ENTRY VIEW -->
+
+  <div id="view-entry">
+    <div class="win-card" id="key-metric">
+      <div id="key-label" style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#444;margin-bottom:8px;">The Only Number That Matters</div>
+      <div style="font-size:11px;color:#555;margin-bottom:12px;line-height:1.6;">Free cash this week vs total cash last week</div>
+      <div id="key-value" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#333;letter-spacing:2px;">Enter numbers below</div>
+      <div id="key-sub" style="font-size:11px;color:#555;margin-top:8px;display:none;"></div>
+    </div>
+
+```
+<div class="grid2 mb24">
+  <div class="card" style="border-top:2px solid #c8a96e;">
+    <div class="lbl">Total Cash</div>
+    <div class="metric-mid gold" id="disp-total">£0</div>
+    <div class="delta" id="disp-total-delta" style="color:#2a2a2a;">—</div>
+  </div>
+  <div class="card" id="free-card" style="border-top:2px solid #4ade80;">
+    <div class="lbl">Free Cash</div>
+    <div class="metric-mid up" id="disp-free">£0</div>
+    <div class="delta" id="disp-free-delta" style="color:#2a2a2a;">—</div>
+  </div>
+</div>
+
+<div class="info-bar">Obligations: <span id="disp-obligations" style="color:#555;">£0</span> &nbsp;|&nbsp; Free = Total − Obligations</div>
+
+<div class="mb16">
+  <div class="lbl">Date</div>
+  <input type="date" class="field" id="input-date" />
+</div>
+
+<div class="grid2 mb16">
+  <div>
+    <div class="lbl">Bank (£)</div>
+    <input type="number" class="field" id="input-bank" placeholder="0" oninput="recalc()" />
+  </div>
+  <div>
+    <div class="lbl">Store (£)</div>
+    <input type="number" class="field" id="input-store" placeholder="0" oninput="recalc()" />
+  </div>
+</div>
+
+<div class="mb16">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <div class="lbl" style="margin:0;">Next 30 Day Obligations (£)</div>
+    <button class="btn-sm" onclick="addExpense()">+ Add</button>
+  </div>
+  <div id="expenses-container"></div>
+</div>
+
+<div class="mb24">
+  <div class="lbl">Note</div>
+  <input type="text" class="field" id="input-note" placeholder="What moved this week..." />
+</div>
+
+<button class="btn-gold" onclick="lockIn()">Lock In This Friday →</button>
+```
+
+  </div>
+
+  <!-- HISTORY VIEW -->
+
+  <div id="view-history">
+    <div id="history-content"></div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'jek_cash_v3';
+  let weeks = [];
+  let expenses = [{ label: 'Wages', amount: '' }, { label: 'Rent', amount: '' }];
+
+  function load() {
+    try {
+      const s = localStorage.getItem(STORAGE_KEY);
+      if (s) weeks = JSON.parse(s);
+    } catch(e) {}
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(weeks)); } catch(e) {}
+  }
+
+  function calcTotals(w) {
+    const total = (parseFloat(w.bankCash) || 0) + (parseFloat(w.storeCash) || 0);
+    const obligations = w.expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+    return { total, obligations, free: total - obligations };
+  }
+
+  function fmt(n) { return '£' + Math.abs(Math.round(n)).toLocaleString(); }
+  function sign(n) { return n >= 0 ? '▲' : '▼'; }
+
+  function init() {
+    load();
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('input-date').value = today;
+    renderExpenses();
+    recalc();
+    updateHistoryTab();
+  }
+
+  function renderExpenses() {
+    const container = document.getElementById('expenses-container');
+    container.innerHTML = '';
+    expenses.forEach((exp, i) => {
+      const row = document.createElement('div');
+      row.className = 'expense-row';
+      row.innerHTML = `
+        <input type="text" class="field flex-2" placeholder="Label" value="${exp.label}" oninput="updateExpense(${i},'label',this.value)" style="flex:2;" />
+        <input type="number" class="field flex-1" placeholder="0" value="${exp.amount}" oninput="updateExpense(${i},'amount',this.value);recalc()" style="flex:1;" />
+        ${expenses.length > 1 ? `<button class="btn-sm" onclick="removeExpense(${i})" style="padding:0 10px;">×</button>` : ''}
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  function updateExpense(i, field, val) {
+    expenses[i][field] = val;
+  }
+
+  function addExpense() {
+    expenses.push({ label: '', amount: '' });
+    renderExpenses();
+  }
+
+  function removeExpense(i) {
+    expenses.splice(i, 1);
+    renderExpenses();
+    recalc();
+  }
+
+  function recalc() {
+    const bank = parseFloat(document.getElementById('input-bank').value) || 0;
+    const store = parseFloat(document.getElementById('input-store').value) || 0;
+    const total = bank + store;
+    const obligations = expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+    const free = total - obligations;
+    const last = weeks.length > 0 ? calcTotals(weeks[weeks.length - 1]) : null;
+
+    document.getElementById('disp-total').textContent = '£' + total.toLocaleString();
+    document.getElementById('disp-free').textContent = '£' + free.toLocaleString();
+    document.getElementById('disp-obligations').textContent = '£' + obligations.toLocaleString();
+
+    const freeCard = document.getElementById('free-card');
+    const freeEl = document.getElementById('disp-free');
+    freeCard.style.borderTop = `2px solid ${free >= 0 ? '#4ade80' : '#f87171'}`;
+    freeEl.className = `metric-mid ${free >= 0 ? 'up' : 'down'}`;
+
+    if (last) {
+      const td = total - last.total;
+      const fd = free - last.free;
+      const tdEl = document.getElementById('disp-total-delta');
+      const fdEl = document.getElementById('disp-free-delta');
+      tdEl.textContent = `${sign(td)} ${fmt(td)} vs last`;
+      tdEl.className = `delta ${td >= 0 ? 'up' : 'down'}`;
+      fdEl.textContent = `${sign(fd)} ${fmt(fd)} vs last`;
+      fdEl.className = `delta ${fd >= 0 ? 'up' : 'down'}`;
+
+      const keyDelta = free - last.total;
+      const winning = keyDelta >= 0;
+      const wc = document.getElementById('key-metric');
+      const kl = document.getElementById('key-label');
+      const kv = document.getElementById('key-value');
+      const ks = document.getElementById('key-sub');
+      wc.style.borderColor = winning ? '#4ade80' : '#f87171';
+      wc.style.background = winning ? '#0a160a' : '#160a0a';
+      kl.textContent = winning ? '✓ You\'re Winning' : '✗ Not There Yet';
+      kl.style.color = winning ? '#4ade80' : '#f87171';
+      kv.style.fontFamily = "'Bebas Neue', sans-serif";
+      kv.style.fontSize = '48px';
+      kv.style.color = winning ? '#4ade80' : '#f87171';
+      kv.textContent = `${sign(keyDelta)} ${fmt(keyDelta)}`;
+      ks.style.display = 'block';
+      ks.innerHTML = `Free cash <span style="color:#888">${fmt(free)}</span> vs last week total <span style="color:#888">${fmt(last.total)}</span>`;
+    }
+  }
+
+  function lockIn() {
+    const date = document.getElementById('input-date').value;
+    const bankCash = document.getElementById('input-bank').value;
+    const storeCash = document.getElementById('input-store').value;
+    const note = document.getElementById('input-note').value;
+    weeks.push({ id: Date.now(), date, bankCash, storeCash, expenses: JSON.parse(JSON.stringify(expenses)), note });
+    save();
+    document.getElementById('input-bank').value = '';
+    document.getElementById('input-store').value = '';
+    document.getElementById('input-note').value = '';
+    expenses = [{ label: 'Wages', amount: '' }, { label: 'Rent', amount: '' }];
+    renderExpenses();
+    recalc();
+    switchView('history');
+  }
+
+  function switchView(v) {
+    document.getElementById('view-entry').style.display = v === 'entry' ? 'block' : 'none';
+    document.getElementById('view-history').style.display = v === 'history' ? 'block' : 'none';
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', (v === 'entry' && i === 0) || (v === 'history' && i === 1));
+    });
+    if (v === 'history') renderHistory();
+  }
+
+  function updateHistoryTab() {
+    document.getElementById('history-tab').textContent = `History${weeks.length > 0 ? ' (' + weeks.length + ')' : ''}`;
+  }
+
+  function renderHistory() {
+    updateHistoryTab();
+    const container = document.getElementById('history-content');
+    if (weeks.length === 0) {
+      container.innerHTML = '<div class="empty">No weeks logged yet.<br><span style="color:#222">Start this Friday.</span></div>';
+      return;
+    }
+
+    let html = '';
+
+    if (weeks.length >= 2) {
+      const first = calcTotals(weeks[0]);
+      const latest = calcTotals(weeks[weeks.length - 1]);
+      const sprintKey = latest.free - first.total;
+      const td = latest.total - first.total;
+      const fd = latest.free - first.free;
+      const sw = sprintKey >= 0;
+      html += `
+        <div class="card mb20" style="border-color:${sw ? '#1a2a1a' : '#2a1a1a'};">
+          <div class="lbl">Sprint Performance — ${weeks.length} weeks</div>
+          <hr class="divider" style="margin:10px 0;" />
+          <div style="margin-bottom:12px;">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:${sw ? '#4ade80' : '#f87171'};margin-bottom:4px;">${sw ? '✓ Winning the sprint' : '✗ Behind on the sprint'}</div>
+            <div style="font-size:10px;color:#444;margin-bottom:4px;">Latest free cash vs starting total cash</div>
+            <div class="metric-mid ${sw ? 'up' : 'down'}">${sign(sprintKey)} ${fmt(sprintKey)}</div>
+          </div>
+          <div class="grid2">
+            <div><div class="lbl">Total cash</div><div class="metric-sm ${td >= 0 ? 'up' : 'down'}">${sign(td)} ${fmt(td)}</div></div>
+            <div><div class="lbl">Free cash</div><div class="metric-sm ${fd >= 0 ? 'up' : 'down'}">${sign(fd)} ${fmt(fd)}</div></div>
+          </div>
+        </div>`;
+    }
+
+    [...weeks].reverse().forEach((w, i, arr) => {
+      const wt = calcTotals(w);
+      const prev = arr[i + 1] ? calcTotals(arr[i + 1]) : null;
+      const kd = prev ? wt.free - prev.total : null;
+      const td = prev ? wt.total - prev.total : null;
+      const fd = prev ? wt.free - prev.free : null;
+      const dateStr = new Date(w.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+      html += `
+        <div class="history-card" style="border-left:${kd !== null ? (kd >= 0 ? '2px solid #4ade80' : '2px solid #f87171') : '1px solid #1a1a1a'};">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="history-meta">${dateStr}</div>
+            <button class="btn-sm" onclick="deleteWeek(${w.id})" style="padding:3px 8px;font-size:12px;">×</button>
+          </div>
+          ${kd !== null ? `
+            <div style="margin:10px 0;padding:8px 10px;background:${kd >= 0 ? '#0a140a' : '#140a0a'};border:1px solid ${kd >= 0 ? '#1a2a1a' : '#2a1a1a'};">
+              <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:${kd >= 0 ? '#4ade80' : '#f87171'};margin-bottom:2px;">${kd >= 0 ? '✓ Winning' : '✗ Behind'}</div>
+              <div style="font-size:10px;color:#555;">Free cash vs prev total: <span class="${kd >= 0 ? 'up' : 'down'}">${sign(kd)} ${fmt(kd)}</span></div>
+            </div>` : ''}
+          <hr class="divider" style="margin:10px 0;" />
+          <div class="grid2">
+            <div><div class="lbl">Total Cash</div><div class="metric-sm gold">${fmt(wt.total)}</div>${td !== null ? `<div class="delta ${td >= 0 ? 'up' : 'down'}">${sign(td)} ${fmt(td)}</div>` : ''}</div>
+            <div><div class="lbl">Free Cash</div><div class="metric-sm ${wt.free >= 0 ? 'up' : 'down'}">${fmt(wt.free)}</div>${fd !== null ? `<div class="delta ${fd >= 0 ? 'up' : 'down'}">${sign(fd)} ${fmt(fd)}</div>` : ''}</div>
+          </div>
+          ${w.note ? `<div style="font-size:11px;color:#444;margin-top:10px;font-style:italic;">${w.note}</div>` : ''}
+        </div>`;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function deleteWeek(id) {
+    weeks = weeks.filter(w => w.id !== id);
+    save();
+    renderHistory();
+  }
+
+  init();
+</script>
+
+</body>
+</html>
